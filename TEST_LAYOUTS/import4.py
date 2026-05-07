@@ -449,7 +449,7 @@ class LaundryApp(ctk.CTk):
     def _init_dim_overlay(self):
         if self._dim_overlay is not None:
             return
-        self._dim_overlay = ctk.CTkFrame(self, fg_color="black")
+        self._dim_overlay = ctk.CTkFrame(self, fg_color="black", corner_radius=0)
         self._dim_overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
         self._dim_overlay.lift()
         self._dim_overlay.place_forget()
