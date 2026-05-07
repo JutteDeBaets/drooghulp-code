@@ -167,7 +167,6 @@ class LaundryApp(ctk.CTk):
         self.title("Laundry Dashboard")
         self.geometry("800x480")
         self.attributes("-fullscreen", True)
-        self.attributes("-alpha", 1.0)
  
         self.actieve_timers = []
         self.current_screen = None  # Cruciaal: dit voorkomt de AttributeError
@@ -176,10 +175,11 @@ class LaundryApp(ctk.CTk):
         self.sidebar_buttons = {}
         self.sidebar_visible = True
         self.popup_time_label = None
-        self._current_alpha = 1.0
+        self._overlay_alpha = 0.0
         self._last_motion_time = time.monotonic()
         self._is_dimmed = False
         self._fade_after_id = None
+        self._dim_overlay = None
  
         # Snelkoppelingen naar kleuren
         for k, v in self.KLEUREN.items():
@@ -284,6 +284,7 @@ class LaundryApp(ctk.CTk):
         threading.Thread(target=self._load_weather_async, daemon=True).start()
 
         # ── Motion fade loop ───────────────────
+        self._init_dim_overlay()
         self._motion_fade_loop()
  
     def on_closing(self):
@@ -472,7 +473,18 @@ class LaundryApp(ctk.CTk):
         except Exception:
             return None
 
-    def _fade_to(self, target_alpha, steps=10, step_ms=30):
+    def _init_dim_overlay(self):
+        if self._dim_overlay is not None:
+            return
+        self._dim_overlay = ctk.CTkToplevel(self)
+        self._dim_overlay.overrideredirect(True)
+        self._dim_overlay.attributes("-fullscreen", True)
+        self._dim_overlay.attributes("-topmost", True)
+        self._dim_overlay.attributes("-alpha", 0.0)
+        self._dim_overlay.configure(fg_color="black")
+        self._dim_overlay.withdraw()
+
+    def _fade_to(self, target_alpha, steps=30, step_ms=100):
         if self._fade_after_id is not None:
             try:
                 self.after_cancel(self._fade_after_id)
@@ -480,24 +492,33 @@ class LaundryApp(ctk.CTk):
                 pass
             self._fade_after_id = None
 
-        start_alpha = self._current_alpha
+        if self._dim_overlay is None:
+            return
+
+        if target_alpha > 0 and not self._dim_overlay.winfo_viewable():
+            self._dim_overlay.deiconify()
+            self._dim_overlay.lift()
+
+        start_alpha = self._overlay_alpha
         delta = (target_alpha - start_alpha) / max(1, steps)
 
         def _step(i=1):
             new_alpha = start_alpha + delta * i
-            self._current_alpha = new_alpha
-            self.attributes("-alpha", new_alpha)
+            self._overlay_alpha = new_alpha
+            self._dim_overlay.attributes("-alpha", new_alpha)
             if i < steps:
                 self._fade_after_id = self.after(step_ms, _step, i + 1)
             else:
                 self._fade_after_id = None
+                if target_alpha <= 0:
+                    self._dim_overlay.withdraw()
 
         _step()
 
     def _motion_fade_loop(self):
         if not self.gpio_available:
-            if self._current_alpha != 1.0:
-                self._fade_to(1.0)
+            if self._overlay_alpha != 0.0:
+                self._fade_to(0.0)
             self.after(1000, self._motion_fade_loop)
             return
 
@@ -507,10 +528,10 @@ class LaundryApp(ctk.CTk):
 
         idle_time = time.monotonic() - self._last_motion_time
         if idle_time >= 30 and not self._is_dimmed:
-            self._fade_to(0.05)
+            self._fade_to(1.0)
             self._is_dimmed = True
         elif idle_time < 30 and self._is_dimmed:
-            self._fade_to(1.0)
+            self._fade_to(0.0)
             self._is_dimmed = False
 
         self.after(500, self._motion_fade_loop)
