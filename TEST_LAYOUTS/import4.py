@@ -410,7 +410,7 @@ class LaundryApp(ctk.CTk):
         return value & 0x0FFF
  
     def get_internal_sensor_data(self) -> dict:
-        """Leest DHT temp/vocht (met caching) en PmodAD1 geluidssensor.
+        """Leest DHT temp/vocht (met caching), PmodAD1 geluidssensor en motion.
         DHT wordt max. eens per 2 seconden uitgelezen (timing uit main.py).
         Zonder Pi worden vaste testwaarden teruggegeven.
         """
@@ -422,6 +422,14 @@ class LaundryApp(ctk.CTk):
                 geluid    = round((raw_value / 4095.0) * VREF, 3)
             except Exception as e:
                 print(f"Fout bij uitlezen geluidssensor: {e}")
+
+        # --- Bewegingssensor ---
+        motion = 0
+        if self.gpio_available:
+            try:
+                motion = int(GPIO.input(MOTION_BCM_PIN))
+            except Exception as e:
+                print(f"Fout bij uitlezen bewegingssensor: {e}")
  
         # --- DHT temperatuur & vochtigheid (gecached, max 1x per 2s) ---
         now = time.monotonic()
@@ -445,6 +453,7 @@ class LaundryApp(ctk.CTk):
             "temp":   round(temp,  1),
             "vocht":  round(vocht, 1),
             "geluid": geluid,
+            "motion": motion,
         }
     
     def fetch_energy_prices(self):
@@ -1401,6 +1410,7 @@ class LaundryApp(ctk.CTk):
             info  = f"DHT Temp: {binnen['temp']}\n"
             info += f"DHT Vocht: {binnen['vocht']}\n"
             info += f"Sound ADC: {binnen['geluid']}V\n"
+            info += f"Motion: {binnen['motion']}\n"
             info += f"On Pi: {ON_PI}\n"
             info += f"Next DHT Read: {round(self._next_dht_time - time.monotonic(), 1)}s"
             info_label.configure(text=info)
