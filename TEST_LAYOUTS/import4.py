@@ -311,10 +311,27 @@ class LaundryApp(ctk.CTk):
         try:
             with urlopen("http://ip-api.com/json/", timeout=5) as r:
                 data = json.load(r)
+                lat = data.get("lat", DEFAULT_LAT)
+                lon = data.get("lon", DEFAULT_LON)
+                city = data.get("city", DEFAULT_CITY)
+
+                try:
+                    geo_url = (
+                        "https://geocoding-api.open-meteo.com/v1/reverse"
+                        f"?latitude={lat}&longitude={lon}&count=1&language=nl"
+                    )
+                    geo_resp = requests.get(geo_url, timeout=5)
+                    geo_data = geo_resp.json()
+                    results = geo_data.get("results") or []
+                    if results:
+                        city = results[0].get("name", city)
+                except Exception:
+                    pass
+
                 return {
-                    "city": data.get("city", DEFAULT_CITY),
-                    "lat":  data.get("lat",  DEFAULT_LAT),
-                    "lon":  data.get("lon",  DEFAULT_LON),
+                    "city": city,
+                    "lat":  lat,
+                    "lon":  lon,
                 }
         except Exception as e:
             print(f"Locatie fout: {e}")
