@@ -167,7 +167,6 @@ class LaundryApp(ctk.CTk):
         self.title("Laundry Dashboard")
         self.geometry("800x480")
         self.attributes("-fullscreen", True)
-        self.overrideredirect(True)
  
         self.actieve_timers = []
         self.current_screen = None  # Cruciaal: dit voorkomt de AttributeError
@@ -1372,7 +1371,6 @@ class LaundryApp(ctk.CTk):
         debug_win.transient(self)
         debug_win.lift()
         debug_win.focus_force()
-        debug_win.grab_set()
 
         info_label = ctk.CTkLabel(debug_win, text="", font=("Consolas", 14), justify="left")
         info_label.pack(pady=20)
