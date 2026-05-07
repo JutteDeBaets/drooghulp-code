@@ -166,6 +166,8 @@ class LaundryApp(ctk.CTk):
  
         self.title("Laundry Dashboard")
         self.geometry("800x480")
+        self.attributes("-fullscreen", True)
+        self.overrideredirect(True)
  
         self.actieve_timers = []
         self.current_screen = None  # Cruciaal: dit voorkomt de AttributeError
