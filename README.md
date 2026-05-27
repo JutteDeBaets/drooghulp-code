@@ -1,6 +1,8 @@
 # 🌲 Drooghulp
 
-Een slim dashboard op de Raspberry Pi dat je helpt beslissen **waar je het beste je was hangt te drogen**: buiten, binnen of in de droogkast. De app combineert live weerdata, sensormetingen en energieprijzen om een aanbeveling te geven.
+Een slim dashboard op de Raspberry Pi dat je helpt beslissen **waar je het beste je was hangt om te drogen**: buiten, binnen of in de droogkast. De app combineert live weerdata, sensormetingen en energieprijzen om een aanbeveling te geven.
+
+<img src="">
 
 ---
 
