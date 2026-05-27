@@ -28,6 +28,8 @@ Een slim dashboard op de Raspberry Pi dat je helpt beslissen **waar je het beste
 | PIR bewegingssensor | BOARD pin 8 (BCM 14) |
 | 7-inch touchscreen | HDMI + USB |
 
+<img src=".img/circuit.jpg">
+
 ---
 
 ## Mapstructuur
