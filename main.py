@@ -650,13 +650,13 @@ class LaundryApp(ctk.CTk):
 
         # Buiten is voorkeur 1
         if buiten_mogelijk:
-            scores.append(("Buiten", 1)) # Laagste score = hoogste prioriteit
+            scores.append(("Buiten", 2)) # Laagste score = hoogste prioriteit
         else:
             scores.append(("Buiten", 999999)) # Wordt nooit aanbevolen
 
         # Binnen is voorkeur 2
         if binnen_mogelijk:
-            scores.append(("Binnen", 2))
+            scores.append(("Binnen", 1))
         else:
             scores.append(("Binnen", 888888)) # Wordt nooit aanbevolen
 
